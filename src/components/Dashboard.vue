@@ -1,3 +1,3 @@
 <template>
-<h2>Dashboard</h2>
+<h2>Nothing yet...</h2>
 </template>
