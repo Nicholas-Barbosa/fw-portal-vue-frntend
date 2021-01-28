@@ -13,6 +13,7 @@ export default {
 	},
     methods: {
         onMenuItemClick(event) {
+		
             this.$emit('menuitem-click', event);
         }
     },

@@ -61,7 +61,9 @@ export default {
                 {
                   label: "Cosnultas",
                   icon: "pi pi-fw pi-search",
-                  items: [{ label: "Por Remetente" ,icon:"pi pi-fw pi-users"}],
+                  items: [
+                    { label: "Por Remetente", icon: "pi pi-fw pi-users" },
+                  ],
                 },
               ],
             },
@@ -71,8 +73,29 @@ export default {
     };
   },
   methods: {
+    onWrapperClick() {
+      if (!this.menuClick) {
+        this.overlayMenuActive = false;
+        this.mobileMenuActive = false;
+      }
+      this.menuClick = false;
+    },
     onMenuToggle() {
       this.menuClick = true;
+      if (this.isDesktop()) {
+        if (this.layoutMode === "overlay") {
+          if (this.mobileMenuActive === true) {
+            this.overlayMenuActive = true;
+          }
+          this.overlayMenuActive = !this.overlayMenuActive;
+          this.mobileMenuActive = false;
+        } else if (this.layoutMode === "static") {
+          this.staticMenuInactive = !this.staticMenuInactive;
+        }
+      } else {
+        this.mobileMenuActive = !this.mobileMenuActive;
+      }
+      event.preventDefault();
     },
     onMenuItemClick(event) {
       if (event.item && !event.item.items) {
