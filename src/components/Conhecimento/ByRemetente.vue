@@ -11,7 +11,7 @@
                 icon="pi pi-check"
                 class="p-button-success"
                 label="Encontrar"
-                v-on:click="findByRemetente"
+                v-on:click="callFindByRemetenteMethod"
                 v-if="isBtnShow"
               />
               <InputMask
@@ -38,60 +38,34 @@
         <h4 v-if="isRenderSpinnerPesquisa">{{ msgH4Pesquisa }}</h4>
 
         <ProgressSpinner v-if="isRenderSpinnerPesquisa" />
-        <!-- <DataTable
-          :value="conhecimentos"
-          class="p-datatable-gridlines p-datatable-striped"
-          :scrollable="true"
-          :resizableColumns="true"
-          columnResizeMode="expand"
-          v-if="isRenderDatatable"
-          rowGroupMode="subheader" groupRowsBy="emitente.nome"
-        >
-          <template #header> Resultados </template>
-          <Column field="{numero}" header="Numero / Serie">
-            <template #body="slotProps">
-             
-              {{ slotProps.data.numero +' / '+slotProps.data.serie }}
-            </template>
-          </Column>
-          <Column field="emissao" header="Emissao">
-            <template #body="slotProps">
-              
-              {{ slotProps.data.emissao }}
-            </template>
-          </Column>
-          <Column field="total" header="Total">
-            <template #body="slotProps">
-              {{ formatCurrency(slotProps.data.total) }}
-            </template>
-          </Column>
-          <Column field="cnpj" header="Total">
-            <template #body="slotProps">
-              {{ formatCurrency(slotProps.data.emitente.CNPJ) }}
-            </template>
-          </Column>
-         
-        </DataTable> -->
+
         <DataTable
           :value="conhecimentos"
           rowGroupMode="rowspan"
-          groupRowsBy="emitente.CNPJ"
+          groupRowsBy="emitente.cnpj"
           sortMode="single"
-          sortField="emitente.CNPJ"
+          sortField="emitente.cnpj"
           :sortOrder="1"
           v-if="isRenderDatatable"
+          :lazy="true"
+          :paginator="true"
+          :rows="10"
+          :totalRecords="totalRecords"
+          :loading="loading"
+          @page="onPage($event)"
+          @sort="onSort($event)"
         >
-          <Column header="#" headerStyle="width:3em">
+          <Column header="#" headerStyle="width:3em" :sortable="true">
             <template #body="slotProps">
               {{ slotProps.index }}
             </template>
           </Column>
-          <Column field="emitente.CNPJ" header="Emitente">
+          <Column field="emitente.cnpj" header="Emitente" :sortable="true">
             <template #body="slotProps">
               <span class="image-text">{{ slotProps.data.emitente.nome }}</span>
             </template>
           </Column>
-          <Column header="Núm/Serie">
+          <Column field="numero" header="Núm/Serie" :sortable="true">
             <template #body="slotProps">
               <span class="image-text"
                 >{{ slotProps.data.numero }} / {{ slotProps.data.serie }}</span
@@ -99,8 +73,8 @@
             </template>
           </Column>
 
-          <Column field="emissao" header="Emissão"></Column>
-          <Column header="Total">
+          <Column field="emissao" header="Emissão" :sortable="true"></Column>
+          <Column filed="total" header="Total" :sortable="true">
             <template #body="slotProps">
               {{ formatCurrency(slotProps.data.total) }}
             </template>
@@ -123,7 +97,7 @@
       header="Detalhes do Conhecimento"
       :modal="true"
       class="p-fluid"
-      :style="{ width: '50vw' }"
+      :style="{ width: '70vw' }"
       :maximizable="true"
     >
       <TabView class="tabview-custom">
@@ -198,7 +172,7 @@
 
               <InputMask
                 id="cnpj"
-                v-model.trim="currentConhecimento.emitente.CNPJ"
+                v-model.trim="currentConhecimento.emitente.cnpj"
                 mask="999.999.999/9999-9"
                 :unmask="true"
                 readonly="true"
@@ -223,7 +197,7 @@
 
               <InputMask
                 id="cnpj"
-                v-model.trim="currentConhecimento.remetente.CNPJ"
+                v-model.trim="currentConhecimento.remetente.cnpj"
                 mask="999.999.999/9999-9"
                 :unmask="true"
                 readonly="true"
@@ -248,7 +222,7 @@
 
               <InputMask
                 id="cnpj"
-                v-model.trim="currentConhecimento.destinatario.CNPJ"
+                v-model.trim="currentConhecimento.destinatario.cnpj"
                 mask="999.999.999/9999-9"
                 :unmask="true"
                 readonly="true"
@@ -304,7 +278,7 @@
 
               <InputMask
                 id="cnpj"
-                v-model.trim="currentConhecimento.emitente.CNPJ"
+                v-model.trim="currentConhecimento.emitente.cnpj"
                 mask="999.999.999/9999-9"
                 :unmask="true"
                 readonly="true"
@@ -378,7 +352,7 @@
 
               <InputMask
                 id="cnpj"
-                v-model.trim="currentConhecimento.remetente.CNPJ"
+                v-model.trim="currentConhecimento.remetente.cnpj"
                 mask="999.999.999/9999-9"
                 :unmask="true"
                 readonly="true"
@@ -454,7 +428,7 @@
 
               <InputMask
                 id="cnpj"
-                v-model.trim="currentConhecimento.destinatario.CNPJ"
+                v-model.trim="currentConhecimento.destinatario.cnpj"
                 mask="999.999.999/9999-9"
                 :unmask="true"
                 readonly="true"
@@ -557,6 +531,13 @@ export default {
       expandedRowGroups: null,
       isViewObjectDialogVisible: false,
       currentConhecimento: null,
+      totalRecords: 0,
+      loading: false,
+      lazyParams: {
+        page: 0,
+        sortOrder: "desc",
+        sortField: "emissao",
+      },
     };
   },
   conhecimentoService: null,
@@ -567,36 +548,33 @@ export default {
   },
 
   methods: {
-    showWarn(message) {
-      this.$toast.add({
-        severity: "warn",
-        summary: "Warn Message",
-        detail: message,
-        life: 3000,
-      });
-    },
-    showError(message) {
-      console.log("show error");
-      this.$toast.add({
-        severity: "error",
-        summary: "Error Message",
-        detail: message,
-        life: 3000,
-      });
+    callFindByRemetenteMethod() {
+      this.lazyParams = {
+        page: 0,
+        sortOrder: "desc",
+        sortField: "emissao",
+      };
+      this.findByRemetente();
     },
     findByRemetente() {
       if (this.cnpjPesquisadoAnteriormente == this.cnpj) {
-        this.showError("Este CNPJ foi usado na consulta anterior!");
+        this.showWarn("Este CNPJ foi usado na consulta anterior!");
       } else {
         this.setIsPesquisandoESpinner(true, "Pesquisando...");
         this.isBtnShow = false;
-        let response = this.conhecimentoService.findByRemetente(this.cnpj);
+        let response = this.conhecimentoService.findByRemetente(
+          this.cnpj,
+          this.lazyParams.page,
+          this.lazyParams.sortOrder,
+          this.lazyParams.sortField
+        );
         response
           .then((data) => {
             this.conhecimentos = data.content;
             this.isRenderDatatable = true;
             this.h5Titulo =
               "Conhecimentos de " + this.conhecimentos[0].remetente.nome;
+            this.totalRecords = data.totalElements;
           })
           .catch((error) => {
             console.log(error.request.status);
@@ -618,7 +596,27 @@ export default {
           });
       }
     },
-
+    onPage(event) {
+      this.loading = true;
+      this.lazyParams = event;
+      this.verifyOrderToSort();
+      this.cnpjPesquisadoAnteriormente = "";
+      this.findByRemetente();
+      this.loading = false;
+    },
+    onSort(event) {
+      this.loading = true;
+      this.lazyParams = event;
+      this.verifyOrderToSort();
+      this.cnpjPesquisadoAnteriormente = "";
+      this.findByRemetente();
+      this.loading = false;
+    },
+    verifyOrderToSort() {
+      if (this.lazyParams.sortOrder == 1) {
+        this.lazyParams.sortOrder = "ASC";
+      } else this.lazyParams.sortOrder = "DESC";
+    },
     setIsPesquisandoESpinner(condicao, msgProgresso) {
       this.isRenderSpinnerPesquisa = condicao;
       this.msgH4Pesquisa = msgProgresso;
@@ -636,16 +634,33 @@ export default {
       this.currentConhecimento = object;
     },
     cleanCnpjVariable() {
-      if(!this.cnpj.length==0 && !this.conhecimentos.length==0){
-          this.cnpj = "";
-          this.conhecimentos=[];
-      }else if(!this.cnpj.length==0){
-          this.cnpj = "";
-      }else if(!this.conhecimentos.length==0){
-         this.conhecimentos=[];
+      if (!this.cnpj.length == 0 && !this.conhecimentos.length == 0) {
+        this.cnpj = "";
+        this.conhecimentos = [];
+      } else if (!this.cnpj.length == 0) {
+        this.cnpj = "";
+      } else if (!this.conhecimentos.length == 0) {
+        this.conhecimentos = [];
       }
-      this.isRenderDatatable=false;
+      this.isRenderDatatable = false;
       this.h5Titulo = "Encontrar por remetente";
+    },
+    showWarn(message) {
+      this.$toast.add({
+        severity: "warn",
+        summary: "Warn Message",
+        detail: message,
+        life: 3000,
+      });
+    },
+    showError(message) {
+      console.log("show error");
+      this.$toast.add({
+        severity: "error",
+        summary: "Error Message",
+        detail: message,
+        life: 3000,
+      });
     },
   },
 };

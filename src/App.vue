@@ -59,7 +59,7 @@ export default {
               icon: "pi pi-fw pi-bookmark",
               items: [
                 {
-                  label: "Cosnultas",
+                  label: "Consultas",
                   icon: "pi pi-fw pi-search",
                   items: [
                     { label: "Por Remetente", icon: "pi pi-fw pi-users",to:"/conhecimento/byRemetente" },
