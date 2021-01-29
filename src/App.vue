@@ -62,7 +62,7 @@ export default {
                   label: "Cosnultas",
                   icon: "pi pi-fw pi-search",
                   items: [
-                    { label: "Por Remetente", icon: "pi pi-fw pi-users" },
+                    { label: "Por Remetente", icon: "pi pi-fw pi-users",to:"/conhecimento/byRemetente" },
                   ],
                 },
               ],
