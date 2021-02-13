@@ -548,13 +548,25 @@ export default {
   },
 
   methods: {
+    isEmpty(referenceType) {
+      return referenceType.length == 0;
+    },
     callFindByRemetenteMethod() {
-      this.lazyParams = {
-        page: 0,
-        sortOrder: "desc",
-        sortField: "emissao",
-      };
-      this.findByRemetente();
+      this.cnpjIsEmpty = false;
+      if (
+        this.cnpjPesquisadoAnteriormente != this.cnpj &&
+        !this.isEmpty(this.cnpj)
+      ) {
+        this.lazyParams = {
+          page: 0,
+          sortOrder: "desc",
+          sortField: "emissao",
+        };
+        this.findByRemetente();
+        this.cnpjPesquisadoAnteriormente = this.cnpj;
+      } else if (this.isEmpty(this.cnpj)) {
+        this.cnpjIsEmpty = true;
+      } else this.showWarn("Este CNPJ foi usado na consulta anterior!");
     },
     findByRemetente() {
       if (this.cnpjPesquisadoAnteriormente == this.cnpj) {
