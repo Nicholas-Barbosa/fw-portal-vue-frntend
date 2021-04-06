@@ -1,7 +1,6 @@
 import { createWebHashHistory, createRouter } from "vue-router";
 import Dashboard from "./components/Dashboard.vue";
-import CByRemetente from "./components/Conhecimento/ByRemetente";
-import MessageTest from "./components/Conhecimento/MessageTest";
+import NewPedido from "./components/pedido/NewPedido";
 export const routes = [
     {
         path: "/dash",
@@ -11,19 +10,14 @@ export const routes = [
     },
 
 
-    {
-        path: "/conhecimento/byRemetente",
-        component: CByRemetente
-
-    },
-    {
-        path: "/conhecimento/message",
-        component: MessageTest
-
-    },
+  
     {
         path: "/:catchAll(.*)",
         component: Dashboard,
+    },
+    {
+        path:"/pedido/novo",
+        component: NewPedido
     }
 
 ];

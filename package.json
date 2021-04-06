@@ -1,5 +1,5 @@
 {
-  "name": "fw-portal-vuejs",
+  "name": "orcamento-gauss",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,11 +15,12 @@
     "axios": "^0.21.1",
     "chart.js": "^2.9.4",
     "core-js": "^3.6.5",
+    "json-ignore": "^0.4.0",
     "mitt": "^2.1.0",
     "node-sass": "^5.0.0",
     "primeflex": "^2.0.0",
     "primeicons": "^4.1.0",
-    "primevue": "^3.2.3",
+    "primevue": "^3.3.5",
     "prismjs": "^1.23.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.3"

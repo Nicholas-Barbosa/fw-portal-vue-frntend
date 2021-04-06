@@ -51,21 +51,13 @@ export default {
         { label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" },
 
         {
-          label: "Frete",
+          label: "Pedido",
           icon: "pi pi-shopping-cart",
           items: [
             {
-              label: "Conhecimento Eletronico",
-              icon: "pi pi-fw pi-bookmark",
-              items: [
-                {
-                  label: "Consultas",
-                  icon: "pi pi-fw pi-search",
-                  items: [
-                    { label: "Por Remetente", icon: "pi pi-fw pi-users",to:"/conhecimento/byRemetente" },
-                  ],
-                },
-              ],
+              label: "Novo",
+              icon: "pi pi-plus",
+              to: "/pedido/novo",
             },
           ],
         },
